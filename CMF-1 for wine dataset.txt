@@ -1,0 +1,52 @@
+import numpy as np
+from sklearn import svm, datasets
+from sklearn.metrics import f1_score, accuracy_score, precision_score, recall_score, roc_auc_score
+from sklearn.model_selection import train_test_split
+
+def my_kernel(X, Y, gamma=1, beta=1):
+    """
+    Custom kernel function.
+    """
+    D = np.zeros((X.shape[0], Y.shape[0]))
+    for i, x in enumerate(X):
+        for j, y in enumerate(Y):
+            D[i, j] = np.exp(-gamma * np.linalg.norm(x - y) ** beta)
+    return D
+
+def evaluate_svm_model(model, X_test, y_test):
+    """
+    Evaluate the SVM model and return performance metrics.
+    """
+    y_pred = model.predict(X_test)
+    F1 = f1_score(y_test, y_pred, average='macro')
+    ACC = accuracy_score(y_test, y_pred)
+    Precision = precision_score(y_test, y_pred, average='macro')
+    Recall = recall_score(y_test, y_pred, average='macro')
+    Roc_auc_Score = roc_auc_score(y_test, model.predict_proba(X_test), average='macro', multi_class="ovr")
+    return {'ACC': ACC, 'F1': F1, 'Precision': Precision, 'Recall': Recall, "Roc_auc_Score": Roc_auc_Score}
+
+# import some data to play with
+wine = datasets.load_wine()
+X = wine.data
+Y = wine.target
+
+X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size=0.3, random_state=42)
+
+# Default SVM model results
+model_default = svm.SVC(kernel="rbf", gamma=1, probability=True)
+model_default.fit(X_train, y_train)
+sonucSVMDefault = evaluate_svm_model(model_default, X_test, y_test)
+
+# Custom kernel SVM model results
+gamma_custom = 1
+beta_custom = 1
+model_custom = svm.SVC(kernel=my_kernel, gamma=gamma_custom, beta=beta_custom, probability=True)
+model_custom.fit(X_train, y_train)
+sonucSVMCustomKernel = evaluate_svm_model(model_custom, X_test, y_test)
+
+# Display results
+print("Default SVM sonuçları")
+print(sonucSVMDefault)
+print("--------------------")
+print("CustomKernel SVM sonuçları")
+print(sonucSVMCustomKernel)

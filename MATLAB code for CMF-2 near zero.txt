@@ -1,0 +1,25 @@
+% Define time vector
+t = 0:0.01:1;
+
+% Set gamma value
+gamma = 1;
+
+% Compute classic exponential
+y_classic = exp(-gamma * t.^2);
+
+% Set beta values
+beta_values = [5, 2]; % Add more values as needed
+
+% Compute exponential with different beta values
+y_beta = zeros(length(beta_values), length(t));
+for i = 1:length(beta_values)
+    y_beta(i, :) = exp(-gamma * t .* (1 - exp(-2 * beta_values(i) * t)));
+end
+
+% Plot the results
+figure;
+plot(t, y_classic, 'o', t, y_beta(1, :), 'x', t, y_beta(2, :), 'g*');
+legend('Classic', 'Beta = 5', 'Beta = 2');
+xlabel('Time');
+ylabel('y');
+title('Exponential Functions with Different Beta Values');

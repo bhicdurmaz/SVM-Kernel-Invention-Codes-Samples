@@ -1,0 +1,60 @@
+import numpy as np
+from sklearn import svm, datasets
+from sklearn.metrics import f1_score, accuracy_score, precision_score, recall_score, roc_auc_score
+from sklearn.model_selection import train_test_split
+import matplotlib.pyplot as plt
+
+def my_kernel(X, Y, gamma=1, beta=1):
+    """
+    Custom kernel function.
+    """
+    D = np.zeros((X.shape[0], Y.shape[0]))
+    for i, x in enumerate(X):
+        for j, y in enumerate(Y):
+            D[i, j] = np.exp(-gamma * np.linalg.norm(x - y) ** beta)
+    return D
+
+def display_image(image_data):
+    """
+    Display the input image data as a grayscale image.
+    """
+    plt.imshow(image_data, cmap=plt.get_cmap('gray'))
+    plt.show()
+
+def main():
+    """
+    Main function to demonstrate SVM classification.
+    """
+    # Load digits dataset
+    digits = datasets.load_digits()
+    X = digits.data
+    Y = digits.target
+
+    # Split the data into training and testing sets
+    X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size=0.3, random_state=42)
+
+    # Select a specific row for testing
+    selected_row = 3
+    X_test_v1 = X_test[selected_row, :].reshape(1, -1)
+    X_test_image = X_test[selected_row, :].reshape(8, 8)
+    display_image(X_test_image)
+    print("True class label for the 3rd row of the test data:\n", y_test[selected_row], "\n")
+
+    # SVM with default RBF kernel
+    model_default = svm.SVC(kernel="rbf", gamma=1, probability=True)
+    model_default.fit(X_train, y_train)
+    y_pred_default = model_default.predict(X_test_v1)
+
+    print("Predicted class label using default Gaussian SVM for the 3rd row of the test data:\n", y_pred_default, "\n")
+
+    # SVM with custom kernel
+    gamma_custom = 0.2
+    beta_custom = 0.5
+    model_custom = svm.SVC(kernel=my_kernel, gamma=gamma_custom, beta=beta_custom, probability=True)
+    model_custom.fit(X_train, y_train)
+    y_pred_custom = model_custom.predict(X_test_v1)
+
+    print("Predicted class label using 1st Function SVM for the 3rd row of the test data:\n", y_pred_custom, "\n")
+
+if __name__ == "__main__":
+    main()
